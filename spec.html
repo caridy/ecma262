@@ -5509,10 +5509,18 @@
             </tr>
             <tr>
               <td>
-                CreateImportBinding(N, M, N2 )
+                CreateImportBinding(N, M, N2)
               </td>
               <td>
-                Create an immutable indirect binding in a module Environment Record. The String value _N_ is the text of the bound name. _M_ is a Module Record (see <emu-xref href="#sec-abstract-module-records"></emu-xref>), and _N2_ is a binding that exists in M's module Environment Record.
+                Create an immutable import binding in a module Environment Record. The String value _N_ is the text of the bound name. _M_ is a Module Record (see <emu-xref href="#sec-abstract-module-records"></emu-xref>), and _N2_ is a binding that exists in M's module Environment Record.
+              </td>
+            </tr>
+            <tr>
+              <td>
+                CreateIndirectBinding(N, O, P)
+              </td>
+              <td>
+                Create an immutable indirect binding in a module Environment Record. The String value _N_ is the text of the bound name. _O_ is an Object and P is a property key of _O_.
               </td>
             </tr>
             <tr>
@@ -5536,6 +5544,9 @@
             1. Let _envRec_ be the module Environment Record for which the method was invoked.
             1. Assert: _envRec_ has a binding for _N_.
             1. If the binding for _N_ is an indirect binding, then
+              1. Let _O_ and _P_ be the indirection values provided when this binding for _N_ was created.
+              1. Return ? Get(_O_, _P_).
+            1. If the binding for _N_ is an import binding, then
               1. Let _M_ and _N2_ be the indirection values provided when this binding for _N_ was created.
               1. Let _targetEnv_ be _M_.[[Environment]].
               1. If _targetEnv_ is *undefined*, throw a *ReferenceError* exception.
@@ -5583,13 +5594,27 @@
         <!-- es6num="8.1.1.5.5" -->
         <emu-clause id="sec-createimportbinding">
           <h1>CreateImportBinding (_N_, _M_, _N2_)</h1>
-          <p>The concrete Environment Record method CreateImportBinding for module Environment Records creates a new initialized immutable indirect binding for the name _N_. A binding must not already exist in this Environment Record for _N_. _M_ is a Module Record (see <emu-xref href="#sec-abstract-module-records"></emu-xref>), and _N2_ is the name of a binding that exists in M's module Environment Record. Accesses to the value of the new binding will indirectly access the bound value of the target binding.</p>
+          <p>The concrete Environment Record method CreateImportBinding for module Environment Records creates a new initialized immutable import binding for the name _N_. A binding must not already exist in this Environment Record for _N_. _M_ is a Module Record (see <emu-xref href="#sec-abstract-module-records"></emu-xref>), and _N2_ is the name of a binding that exists in M's module Environment Record. Accesses to the value of the new binding will indirectly access the bound value of the target binding.</p>
           <emu-alg>
             1. Let _envRec_ be the module Environment Record for which the method was invoked.
             1. Assert: _envRec_ does not already have a binding for _N_.
             1. Assert: _M_ is a Module Record.
             1. Assert: When _M_.[[Environment]] is instantiated it will have a direct binding for _N2_.
-            1. Create an immutable indirect binding in _envRec_ for _N_ that references _M_ and _N2_ as its target binding and record that the binding is initialized.
+            1. Create an immutable import binding in _envRec_ for _N_ that references _M_ and _N2_ as its target binding and record that the binding is initialized.
+            1. Return NormalCompletion(~empty~).
+          </emu-alg>
+        </emu-clause>
+
+        <!-- es6num="8.1.1.5.5" -->
+        <emu-clause id="sec-createindirectbinding">
+          <h1>CreateIndirectBinding (_N_, _O_, _P_)</h1>
+          <p>The concrete Environment Record method CreateImportBinding for module Environment Records creates a new initialized immutable indirect binding for the name _N_. A binding must not already exist in this Environment Record for _N_. _O_ is an Object, and _P_ is the property key that exists in _O_. Accesses to the value of the new binding will indirectly access the property key _P_ of the object _O_.</p>
+          <emu-alg>
+            1. Let _envRec_ be the module Environment Record for which the method was invoked.
+            1. Assert: _envRec_ does not already have a binding for _N_.
+            1. Assert: Type(_O_) is an Object.
+            1. Assert: Type(_P_) is a String.
+            1. Create an immutable indirect binding in _envRec_ for _N_ that references _O_ and _P_ as its target value and record that the binding is initialized.
             1. Return NormalCompletion(~empty~).
           </emu-alg>
         </emu-clause>
